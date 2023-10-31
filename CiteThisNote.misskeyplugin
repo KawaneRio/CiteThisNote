@@ -1,0 +1,83 @@
+/// @ 0.13.0
+### {
+  name: "このノートを引用する"
+  version: "1.0.0"
+  author: "@KawaneRio@misskey.io"
+  description: "Misskeyでの投稿を參考文獻として引用したいときなど用に、BibLaTeX形式でノートのメタデータを出力します。"
+  permissions: []
+  config: {}
+}
+
+//
+// {notes.text} みたいに書けば Misskey API の https://misskey.io/api-doc#tag/notes/operation/notes/show にある{"text": "string", ...} などから情報を讀み取れる？らしい（よくわかってない）（こんにゃのみんにゃどうやってわかるんだふええ）
+//
+// var note... みたいなのは變數宣言 （たとへば notes.username みたいなのは https://misskey.io/api-doc#tag/notes/operation/notes/show の  Response samples  内にある`"user": {"id": "xxxxxxxxxx","name": "藍", ...}`を參考にした ）
+//
+//ここからCiteThisNote關數。これは最終的にPlugin:register_note_actionから呼び出される
+@functionCiteThisNote(notes){
+
+//	var noteUserName = `{notes.user.username}` //@username の username部分
+//	var noteUserDisplayName = `{notes.user.name}` //表示名
+	var noteCreatedAt = `{notes.createdAt}` // ノートが生成された日時
+//var noteCreatedAtUnix = Date:parse(noteCreatedAt) //ノート生成日時をUnix通秒にする
+//	var noteText = `{notes.text}` // ノートの内容
+//	var noteURL = `{notes.url}` //使っちゃダメ
+//	var noteFileName = `{notes.files.name}` //添付ファイルの名
+//	var noteFileURL = `{notes.files.url}` // 添付ファイルのURL
+//	var noteFileMD5 = `{notes.files.md5}` //添付ファイルのMD5
+//	var noteTags = `{notes.tags}` //ノートのタグ
+
+	//しせるにゃんの助言を基にノートのURLを生成
+	//ありがとうしせるにゃんにゃん♥️ https://misskey.io/notes/9lhy3ug03g
+	let noteURL = `{Mk:url()}notes/{notes.id}`
+	
+	// {} `などの越化
+	var leftCurlyBraces = "{" //このテクニックはMisskey Pagesで學んだ。
+	var rightCurlyBraces = "}" //ありがとう、しゅいろ。
+	var threeBackticks = "```"
+	
+	//	Reference: https://github.com/aiscript-dev/aiscript/blob/master/docs/std.md#datenow-num
+	//Tkg氏の助言を基にした https://misskey.io/notes/9lhwq42479
+	//今年を入れる
+	var currentYear = Date:year()
+	
+	// @username@example.com の example.com部分。
+	//ここは紗々さんから教へてもらふた https://misskey.io/notes/9lhsh1umas
+	var SERVER_NAME = Mk:url().split('/')[2]
+	//地元鯖が初期値として入ってる仕組み
+	var noteUserHost = `{SERVER_NAME}`
+	//notes.user.hostがnull以外だと{notes.user.host}を入れる
+	//このif文はしせるにゃんの助言 https://misskey.io/notes/9lgj0l6d02 を基にした
+	if (notes.user.host != null) {
+		noteUserHost = `{notes.user.host}`
+	}
+
+	//未實裝機能
+/*
+	note = {leftCurlyBraces}filename = {leftCurlyBraces}{notes.files.name}{rightCurlyBraces},
+	fileurl = {leftCurlyBraces}{notes.files.url}{rightCurlyBraces},
+	filemd5 = {leftCurlyBraces}{notes.files.md5}{rightCurlyBraces},
+	unixtime = {leftCurlyBraces}{Date:now()}{rightCurlyBraces}{rightCurlyBraces},
+*/
+
+//蟲捕り用
+//Mk:dialog("" `@online{leftCurlyBraces}{notes.user.username}_{Date:year()},`) //This works
+
+	//この殊の核心となる部分がこちらです↓
+
+Mk:dialog("" `{threeBackticks}
+@online{leftCurlyBraces}{notes.user.username}_{Date:year()},
+	title = {leftCurlyBraces}{leftCurlyBraces}{notes.user.name}{rightCurlyBraces}の投稿{rightCurlyBraces},
+	url = {leftCurlyBraces}{noteURL}{rightCurlyBraces},
+	abstract = {leftCurlyBraces}{leftCurlyBraces}{notes.text}{rightCurlyBraces}{rightCurlyBraces},
+	type = {leftCurlyBraces}microblogging{rightCurlyBraces},
+	author = {leftCurlyBraces}@{notes.user.username}@{noteUserHost}{rightCurlyBraces},
+	urldate = {leftCurlyBraces}{notes.createdAt}{rightCurlyBraces},
+	date = {leftCurlyBraces}{Date:year()}-{Date:month()}-{Date:day()}{rightCurlyBraces},
+	keywords = {leftCurlyBraces}{notes.tags}{rightCurlyBraces}
+{rightCurlyBraces}
+{threeBackticks}`)
+}
+
+//ノートに項目を追加。押すと17行目の@functionCiteThisNoteが走る。
+Plugin:register_note_action(`このノートを引用する` functionCiteThisNote)
