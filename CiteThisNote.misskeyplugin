@@ -1,7 +1,7 @@
 /// @ 0.13.0
 ### {
   name: "このノートを引用する"
-  version: "1.2.31"
+  version: "1.2.42"
   author: "@KawaneRio@misskey.io"
   description: "Misskeyでの投稿を參考文獻として引用したいときなど用に、BibLaTeX形式でノートのメタデータを出力します。"
   permissions: []
@@ -65,17 +65,11 @@
 	var noteFileURLArray = []
 	var noteFileMD5Array = []
 	
-/*
-for (var i = 0; i < notes.files.length; i++) {
-    noteFileNameArray.push(notes.files[i].name);
-}
-*/
-
 	//もしnotes.filesが空っぽじゃなかったら
 	//notes.filesの要素數回だけforを周す
 	//1周每にnoteFileNameArrayの中に[i]番目の.name要素をpushする
 	if (notes.files.len > 0) {
-		for let i, notes.files.len {
+		for (let i, notes.files.len) {
 			noteFileNameArray.push(notes.files[i].name)
 			noteFileURLArray.push(notes.files[i].url)
 			noteFileMD5Array.push(notes.files[i].md5)
@@ -101,7 +95,7 @@ for (var i = 0; i < notes.files.length; i++) {
 
 Mk:dialog("" `{threeBackticks}
 @online{leftCurlyBraces}{notes.user.username}_{noteCreatedAtUnix},
-	title = {leftCurlyBraces}{leftCurlyBraces}{notes.user.name}{rightCurlyBraces}の投稿{rightCurlyBraces},
+	title = {leftCurlyBraces}{leftCurlyBraces}{notes.user.name}@{notes.user.username}{rightCurlyBraces}の投稿{rightCurlyBraces},
 	url = {leftCurlyBraces}{noteURL}{rightCurlyBraces},
 	abstract = {leftCurlyBraces}{leftCurlyBraces}{notes.text}{rightCurlyBraces}{rightCurlyBraces},
 	titleaddon = {leftCurlyBraces}{siteName}{rightCurlyBraces},
