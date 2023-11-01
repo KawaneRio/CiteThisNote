@@ -26,6 +26,7 @@
 //	var noteFileURL = `{notes.files.url}` // 添付ファイルのURL
 //	var noteFileMD5 = `{notes.files.md5}` //添付ファイルのMD5
 //	var noteTags = `{notes.tags}` //ノートのタグ
+	var siteName = Mk:api("meta" {}).name
 
 	//しせるにゃんの助言を基にノートのURLを生成
 	//ありがとうしせるにゃんにゃん♥️ https://misskey.io/notes/9lhy3ug03g
@@ -70,6 +71,7 @@ Mk:dialog("" `{threeBackticks}
 	title = {leftCurlyBraces}{leftCurlyBraces}{notes.user.name}{rightCurlyBraces}の投稿{rightCurlyBraces},
 	url = {leftCurlyBraces}{noteURL}{rightCurlyBraces},
 	abstract = {leftCurlyBraces}{leftCurlyBraces}{notes.text}{rightCurlyBraces}{rightCurlyBraces},
+	titleaddon = {leftCurlyBraces}{siteName}{rightCurlyBraces},
 	type = {leftCurlyBraces}microblogging{rightCurlyBraces},
 	author = {leftCurlyBraces}@{notes.user.username}@{noteUserHost}{rightCurlyBraces},
 	urldate = {leftCurlyBraces}{notes.createdAt}{rightCurlyBraces},
