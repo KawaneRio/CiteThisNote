@@ -1,7 +1,7 @@
 /// @ 0.13.0
 ### {
   name: "このノートを引用する"
-  version: "1.0.0"
+  version: "1.2.31"
   author: "@KawaneRio@misskey.io"
   description: "Misskeyでの投稿を參考文獻として引用したいときなど用に、BibLaTeX形式でノートのメタデータを出力します。"
   permissions: []
@@ -19,7 +19,8 @@
 //	var noteUserName = `{notes.user.username}` //@username の username部分
 //	var noteUserDisplayName = `{notes.user.name}` //表示名
 	var noteCreatedAt = `{notes.createdAt}` // ノートが生成された日時
-//var noteCreatedAtUnix = Date:parse(noteCreatedAt) //ノート生成日時をUnix通秒にする
+	var noteCreatedAtUnix = Date:parse(noteCreatedAt) //ノート生成日時をUnix通秒にする
+	var noteCreatedAtYear = Date:year(noteCreatedAtUnix) //ノート生成年を計算する
 //	var noteText = `{notes.text}` // ノートの内容
 //	var noteURL = `{notes.url}` //使っちゃダメ
 //	var noteFileName = `{notes.files.name}` //添付ファイルの名
@@ -41,25 +42,57 @@
 	//Tkg氏の助言を基にした https://misskey.io/notes/9lhwq42479
 	//今年を入れる
 	var currentYear = Date:year()
+	var currentMonth = Date:month()
+	var currentDay = Date:day()
+	
+	
 	
 	// @username@example.com の example.com部分。
 	//ここは紗々さんから教へてもらふた https://misskey.io/notes/9lhsh1umas
 	var SERVER_NAME = Mk:url().split('/')[2]
 	//地元鯖が初期値として入ってる仕組み
 	var noteUserHost = `{SERVER_NAME}`
+	var noteURI = ""
 	//notes.user.hostがnull以外だと{notes.user.host}を入れる
 	//このif文はしせるにゃんの助言 https://misskey.io/notes/9lgj0l6d02 を基にした
 	if (notes.user.host != null) {
 		noteUserHost = `{notes.user.host}`
+		noteURI = `{notes.uri}`
 	}
 
+	//ここから文件の處理
+	var noteFileNameArray = []
+	var noteFileURLArray = []
+	var noteFileMD5Array = []
+	
+/*
+for (var i = 0; i < notes.files.length; i++) {
+    noteFileNameArray.push(notes.files[i].name);
+}
+*/
+
+	//もしnotes.filesが空っぽじゃなかったら
+	//notes.filesの要素數回だけforを周す
+	//1周每にnoteFileNameArrayの中に[i]番目の.name要素をpushする
+	if (notes.files.len > 0) {
+		for let i, notes.files.len {
+			noteFileNameArray.push(notes.files[i].name)
+			noteFileURLArray.push(notes.files[i].url)
+			noteFileMD5Array.push(notes.files[i].md5)
+		}
+	}
+
+	
 	//未實裝機能
 /*
-	note = {leftCurlyBraces}filename = {leftCurlyBraces}{notes.files.name}{rightCurlyBraces},
 	fileurl = {leftCurlyBraces}{notes.files.url}{rightCurlyBraces},
 	filemd5 = {leftCurlyBraces}{notes.files.md5}{rightCurlyBraces},
-	unixtime = {leftCurlyBraces}{Date:now()}{rightCurlyBraces}{rightCurlyBraces},
 */
+
+
+// 變數が無いことで動かなくなるのを防ぐためここで初期化
+
+
 
 //蟲捕り用
 //Mk:dialog("" `@online{leftCurlyBraces}{notes.user.username}_{Date:year()},`) //This works
@@ -67,16 +100,23 @@
 	//この殊の核心となる部分がこちらです↓
 
 Mk:dialog("" `{threeBackticks}
-@online{leftCurlyBraces}{notes.user.username}_{Date:year()},
+@online{leftCurlyBraces}{notes.user.username}_{noteCreatedAtUnix},
 	title = {leftCurlyBraces}{leftCurlyBraces}{notes.user.name}{rightCurlyBraces}の投稿{rightCurlyBraces},
 	url = {leftCurlyBraces}{noteURL}{rightCurlyBraces},
 	abstract = {leftCurlyBraces}{leftCurlyBraces}{notes.text}{rightCurlyBraces}{rightCurlyBraces},
 	titleaddon = {leftCurlyBraces}{siteName}{rightCurlyBraces},
 	type = {leftCurlyBraces}microblogging{rightCurlyBraces},
 	author = {leftCurlyBraces}@{notes.user.username}@{noteUserHost}{rightCurlyBraces},
-	urldate = {leftCurlyBraces}{notes.createdAt}{rightCurlyBraces},
-	date = {leftCurlyBraces}{Date:year()}-{Date:month()}-{Date:day()}{rightCurlyBraces},
-	keywords = {leftCurlyBraces}{notes.tags}{rightCurlyBraces}
+	urldate = {leftCurlyBraces}{Date:year()}-{Date:month()}-{Date:day()}{rightCurlyBraces},
+	date = {leftCurlyBraces}{notes.createdAt}{rightCurlyBraces},
+	keywords = {leftCurlyBraces}{notes.tags}{rightCurlyBraces},
+	note =  {leftCurlyBraces}
+		filename = {leftCurlyBraces}{noteFileNameArray}{rightCurlyBraces},
+		fileurl = {leftCurlyBraces}{noteFileURLArray}{rightCurlyBraces},
+		filemd5 = {leftCurlyBraces}{noteFileMD5Array}{rightCurlyBraces},
+		uri = {leftCurlyBraces}{noteURI}{rightCurlyBraces},
+		currentunixtime = {leftCurlyBraces}{Date:now()}{rightCurlyBraces}
+	{rightCurlyBraces}
 {rightCurlyBraces}
 {threeBackticks}`)
 }
