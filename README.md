@@ -1,6 +1,17 @@
 # CiteThisNote
 CiteThisNote is a free Misskey Plugin that allows you to obtain all the necessary information you need to reference or "Cite" a note in a neat BibLaTex citation format.
 
+## Version 2.1.4 Release!
+The latest release of CiteThisNote with most of the bugs in v1.0.0 fixed!
+
+- Support for notes with special MFMs like the codeblock
+- Supports notes with however many files attached
+- Supports notes with null text (for file reference)
+- Lists the names of all the files attached to note
+- Lists MD5 Hash of all the attached files
+- Lists URLs of all attached files 
+- Fixed urldate and date flip
+
 ## Installation
 This is a Misskey Plugin that is meant to be installed from your Plugin settings.
 
@@ -26,8 +37,7 @@ When envoked, the Plugin will output a BibLaTeX citation formatted codeblock as 
 Copy the text and paste it to your favorite BibLaTeX handler!
 
 ## Known Issues
-
-As of 2023/11/01, the CiteThisNote v1.0.0 does NOT support notes with MFM codeblocks. Please cite manually for notes with MFM codeblocks embedded.
+As of v2.1.4 , some URLs does not parse correctly and may need to be checked manually.
 
 ## License
 
