@@ -48,13 +48,13 @@ MIT-0
 The following information may be useful for citing this work:
 
 ```
-@software{kawanerio_citethisnote_2023,
+@software{kawanerio_citethisnote_1698928046,
 	title = {{KawaneRio}/{CiteThisNote}},
 	url = {https://github.com/KawaneRio/CiteThisNote},
 	shorttitle = {{CiteThisNote}},
 	abstract = {{CiteThisNote} is a free Misskey Plugin that allows you to obtain all the necessary information you need to reference or "Cite" a note in a neat {BibLaTex} citation format.},
-	version = {v1.0.0},
+	version = {v2.1.4},
 	author = {{KawaneRio}},
-	date = {2023-11-01},
+	date = {2023-11-02},
 }
 ```
