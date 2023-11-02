@@ -1,7 +1,7 @@
 /// @ 0.13.0
 ### {
   name: "このノートを引用する"
-  version: "2.1.4"
+  version: "2.1.41"
   author: "@KawaneRio@misskey.io"
   description: "Misskeyでの投稿を參考文獻として引用したいときなど用に、BibLaTeX形式でノートのメタデータを出力します。"
   permissions: []
@@ -31,8 +31,9 @@
 
 	//しせるにゃんの助言を基にノートのURLを生成
 	//ありがとうしせるにゃんにゃん♥️ https://misskey.io/notes/9lhy3ug03g
-	let noteURL = `{Mk:url()}notes/{notes.id}`
-	
+	//追記：改變は山田結城氏の助言を參考にした https://misskey.io/notes/9lkt7p500p
+	var metaURI = Mk:api("meta" {}).uri
+	var noteURL = `{metaURI}/notes/{notes.id}`
 //	var noteURL = `{Mk:url()}`
 	
 	// {} `などの越化
@@ -120,7 +121,7 @@ Mk:dialog("" `{threeBackticks}
 		fileurl = {leftCurlyBraces}{noteFileURLArrayJoined}{rightCurlyBraces},
 		filemd5 = {leftCurlyBraces}{noteFileMD5ArrayJoined}{rightCurlyBraces},
 		uri = {leftCurlyBraces}{noteURI}{rightCurlyBraces},
-		currentunixtime = {leftCurlyBraces}{Date:now()}{rightCurlyBraces}
+		currenturldate = {leftCurlyBraces}{Date:now()}{rightCurlyBraces}
 	{rightCurlyBraces}
 {rightCurlyBraces}
 {threeBackticks}`)
