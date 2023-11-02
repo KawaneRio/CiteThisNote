@@ -1,7 +1,7 @@
 /// @ 0.13.0
 ### {
   name: "このノートを引用する"
-  version: "1.3.11"
+  version: "2.1.4"
   author: "@KawaneRio@misskey.io"
   description: "Misskeyでの投稿を參考文獻として引用したいときなど用に、BibLaTeX形式でノートのメタデータを出力します。"
   permissions: []
@@ -32,6 +32,8 @@
 	//しせるにゃんの助言を基にノートのURLを生成
 	//ありがとうしせるにゃんにゃん♥️ https://misskey.io/notes/9lhy3ug03g
 	let noteURL = `{Mk:url()}notes/{notes.id}`
+	
+//	var noteURL = `{Mk:url()}`
 	
 	// {} `などの越化
 	var leftCurlyBraces = "{" //このテクニックはMisskey Pagesで學んだ。
@@ -67,14 +69,17 @@
 	
 	//もしnotes.filesが空の場合 ここは無視される氣がする
 	//もしnotes.filesが空っぽじゃなかったら
-	//notes.filesの要素數回だけforを周す
-	//1周每にnoteFileNameArrayの中に[i]番目の.name要素をpushする
+	//notes.filesの要素回數分だけこの殊塊を周す
+	//1周每にnoteFile*Arrayの中へ[file].*の要素をpushする
+	//ここは特に紗々@salano_ym氏の助言を參考にした
+	// https://misskey.io/notes/9ljwy62lqa
 	each let file, notes.files {
-		noteFileNameArray.push(notes.file.name)
-		noteFileURLArray.push(notes.file.url)
-		noteFileMD5Array.push(notes.file.md5)
+		noteFileNameArray.push(file.name)
+		noteFileURLArray.push(file.url)
+		noteFileMD5Array.push(file.md5)
 	}
-
+	
+	//
 	var noteFileNameArrayJoined = noteFileNameArray.join(", ")
 	var noteFileURLArrayJoined = noteFileURLArray.join(", ")
 	var noteFileMD5ArrayJoined = noteFileMD5Array.join(", ")
@@ -86,9 +91,13 @@
 */
 
 
-// 變數が無いことで動かなくなるのを防ぐためここで初期化
-
-
+	// notes.text内に```があったら取り除く
+	// notes.text = null だったら壞れることが判明。知らなかったそんなの...
+	// もし notes.text が空っぽじゃなかったら、replaceをしてほしい
+	var noteTextNoCodeBlock = ""
+	if (notes.text != null) {
+		noteTextNoCodeBlock = notes.text.replace(threeBackticks, "")
+	}
 
 //蟲捕り用
 //Mk:dialog("" `@online{leftCurlyBraces}{notes.user.username}_{Date:year()},`) //This works
@@ -99,7 +108,7 @@ Mk:dialog("" `{threeBackticks}
 @online{leftCurlyBraces}{notes.user.username}_{noteCreatedAtUnix},
 	title = {leftCurlyBraces}{leftCurlyBraces}{notes.user.name}@{notes.user.username}{rightCurlyBraces}の投稿{rightCurlyBraces},
 	url = {leftCurlyBraces}{noteURL}{rightCurlyBraces},
-	abstract = {leftCurlyBraces}{leftCurlyBraces}{notes.text}{rightCurlyBraces}{rightCurlyBraces},
+	abstract = {leftCurlyBraces}{leftCurlyBraces}{noteTextNoCodeBlock}{rightCurlyBraces}{rightCurlyBraces},
 	titleaddon = {leftCurlyBraces}{siteName}{rightCurlyBraces},
 	type = {leftCurlyBraces}microblogging{rightCurlyBraces},
 	author = {leftCurlyBraces}@{notes.user.username}@{noteUserHost}{rightCurlyBraces},
