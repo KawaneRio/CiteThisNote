@@ -1,7 +1,7 @@
 # CiteThisNote
 CiteThisNote is a free Misskey Plugin that allows you to obtain all the necessary information you need to reference or "Cite" a note in a neat BibLaTex citation format.
 
-## Version 2.1.4 Release!
+## Version 2.2.2 Release!
 The latest release of CiteThisNote with most of the bugs in v1.0.0 fixed!
 
 - Support for notes with special MFMs like the codeblock
