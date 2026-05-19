@@ -1,3 +1,5 @@
+**[<ruby>始読書<rp>《</rp><rt>しどくしょ</rt><rp>》</rp></ruby>](始讀書.md)**
+
 # CiteThisNote
 CiteThisNote is a free Misskey Plugin that allows you to obtain all the necessary information you need to reference or "Cite" a note in a neat BibLaTex citation format.
 
