@@ -1,16 +1,12 @@
 # CiteThisNote
 CiteThisNote is a free Misskey Plugin that allows you to obtain all the necessary information you need to reference or "Cite" a note in a neat BibLaTex citation format.
 
-## Version 2.2.2 Release!
-The latest release of CiteThisNote with most of the bugs in v1.0.0 fixed!
+## Version 3.0.0 Release!
+The latest release of CiteThisNote now entirely rewritten using [AiScript](https://aiscript-dev.github.io/ja/) [1.2.1](https://github.com/aiscript-dev/aiscript/releases/tag/1.2.1) !
 
-- Support for notes with special MFMs like the codeblock
-- Supports notes with however many files attached
-- Supports notes with null text (for file reference)
-- Lists the names of all the files attached to note
-- Lists MD5 Hash of all the attached files
-- Lists URLs of all attached files 
-- Fixed urldate and date flip
+- Support for the latest version of Misskey ([v13](https://github.com/misskey-dev/misskey/releases/tag/13.0.0)+)
+- Almost an entire rewrite of the internal function; smarter escape sequences
+- Now lists all the alternate texts of image files attached in notes and stores them in the comment
 
 ## Installation
 This is a Misskey Plugin that is meant to be installed from your Plugin settings.
@@ -26,7 +22,7 @@ This is a Misskey Plugin that is meant to be installed from your Plugin settings
 And CiteThisNote should be installed! Good job🎉
 
 ## Usage
-Click on the Note menu ･･･ and you should see a `このノートを引用する` as your bottommost option.
+Go to a random note in your timeline (It can even be your own note!). Click on the Note menu ･･･ and you should see a `このノートを引用する` as your bottommost option.
 
 ![image](https://github.com/KawaneRio/CiteThisNote/assets/61252570/f9f3fdff-c9bc-4282-ac1a-f18a89111820)
 
@@ -34,10 +30,10 @@ When envoked, the Plugin will output a BibLaTeX citation formatted codeblock as 
 
 ![image](https://github.com/KawaneRio/CiteThisNote/assets/61252570/bf0d0a72-e8ac-40de-9531-6dd19f19116f)
 
-Copy the text and paste it to your favorite BibLaTeX handler!
+Click on the right-top ⧉ icon of the codeblock to copy! Now, you may paste the text onto your favorite BibLaTeX handler! (I use [Zotero](https://www.zotero.org/) by the way)
 
-## Known Issues
-As of v2.1.4 , some URLs does not parse correctly and may need to be checked manually.
+## Issues?
+Please open an issue request at https://github.com/KawaneRio/CiteThisNote/issues/new 
 
 ## License
 
@@ -45,16 +41,16 @@ MIT-0
 
 ## Cite this Code
 
-The following information may be useful for citing this work:
+The following information may be useful for citing this software:
 
 ```
-@software{kawanerio_citethisnote_1698928046,
+@software{kawanerio_citethisnote,
 	title = {{KawaneRio}/{CiteThisNote}},
 	url = {https://github.com/KawaneRio/CiteThisNote},
 	shorttitle = {{CiteThisNote}},
 	abstract = {{CiteThisNote} is a free Misskey Plugin that allows you to obtain all the necessary information you need to reference or "Cite" a note in a neat {BibLaTex} citation format.},
-	version = {v2.1.4},
+	version = {v3.0.0},
 	author = {{KawaneRio}},
-	date = {2023-11-02},
+	date = {2026-05-19},
 }
 ```

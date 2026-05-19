@@ -1,136 +1,110 @@
-/// @ 0.13.0
+/// @ 1.2.1
 ### {
-  name: "このノートを引用する"
-  version: "2.2.2"
+  name: "CiteThisNote"
+  version: "3.0.0"
   author: "@KawaneRio@misskey.io"
-  description: "Misskeyでの投稿を參考文獻として引用したいときなど用に、BibLaTeX形式でノートのメタデータを出力します。"
+  description: "Misskeyでの投稿を參考文獻として引用したいときなど用に、BibLaTeX形式でノートのメタデータを出力します。CiteThisNote is a free Misskey Plugin that allows you to obtain all the necessary information you need to reference or \"Cite\" a note in a neat `BibLaTex` citation format."
   permissions: []
   config: {}
 }
 
-//
-// {notes.text} みたいに書けば Misskey API の https://misskey.io/api-doc#tag/notes/operation/notes/show にある{"text": "string", ...} などから情報を讀み取れる？らしい（よくわかってない）（こんにゃのみんにゃどうやってわかるんだふええ）
-//
-// var note... みたいなのは變數宣言 （たとへば notes.username みたいなのは https://misskey.io/api-doc#tag/notes/operation/notes/show の  Response samples  内にある`"user": {"id": "xxxxxxxxxx","name": "藍", ...}`を參考にした ）
-//
-//ここからCiteThisNote關數。これは最終的にPlugin:register_note_actionから呼び出される
-@functionCiteThisNote(notes){
+//////////////////////////////// 主關 Main Function
+let CiteThisNoteAction = @(notes){
 
-//	var noteUserName = `{notes.user.username}` //@username の username部分
-//	var noteUserDisplayName = `{notes.user.name}` //表示名
-	var noteCreatedAt = `{notes.createdAt}` // ノートが生成された日時
-	var noteCreatedAtUnix = Date:parse(noteCreatedAt) //ノート生成日時をUnix通秒にする
-	var noteCreatedAtYear = Date:year(noteCreatedAtUnix) //ノート生成年を計算する
-//	var noteText = `{notes.text}` // ノートの内容
-//	var noteURL = `{notes.url}` //使っちゃダメ
-//	var noteFileName = `{notes.files.name}` //添付ファイルの名
-//	var noteFileURL = `{notes.files.url}` // 添付ファイルのURL
-//	var noteFileMD5 = `{notes.files.md5}` //添付ファイルのMD5
-//	var noteTags = `{notes.tags}` //ノートのタグ
-	var siteName = Mk:api("meta" {}).name
+var noteCreatedAt = `{notes.createdAt}` // ノートが生成された日時
+var noteCreatedAtUnix = Date:parse(noteCreatedAt) //ノート生成日時をUnix通秒にする
+var noteCreatedAtYear = Date:year(noteCreatedAtUnix) //ノート生成年を計算する
+var currentYear = Date:year()
+var currentMonth = Date:month()
+var currentDay = Date:day()
+var siteName = Mk:api("meta",{}).name
 
-	//しせるにゃんの助言を基にノートのURLを生成
-	//ありがとうしせるにゃんにゃん♥️ https://misskey.io/notes/9lhy3ug03g
-	//追記：改變は山田結城氏の助言を參考にした https://misskey.io/notes/9lkt7p500p
-	//再追記：にゃんかAPIに負荷をかけるのはよくないらしいので、
-	//APIを使はずにMk:url()を改變した、しせるにゃんの殊をここにて使用する
-	// https://misskey.io/notes/9lkv102djq
-	var curentURL = Mk:url().split('/').slice(0 3).join('/')
-	//	var metaURI = Mk:api("meta" {}).uri
-	var noteURL = `{curentURL}/notes/{notes.id}`
+//しせるにゃんの助言を基にノートのURLを生成
+//ありがとうしせるにゃんにゃん♥️ https://misskey.io/notes/9lhy3ug03g
+//追記：改變は山田結城氏の助言を參考にした https://misskey.io/notes/9lkt7p500p
+//再追記：にゃんかAPIに負荷をかけるのはよくないらしいので、
+//APIを使はずにMk:url()を改變した、しせるにゃんの殊をここにて使用する
+// https://misskey.io/notes/9lkv102djq
+var curentURL = Mk:url().split('/').slice(0,3).join('/')
+//	var metaURI = Mk:api("meta",{}).uri
+var noteURL = `{curentURL}/notes/{notes.id}`
 //	var noteURL = `{Mk:url()}`
 
-
-	// {} `などの越化
-	var leftCurlyBraces = "{" //このテクニックはMisskey Pagesで學んだ。
-	var rightCurlyBraces = "}" //ありがとう、しゅいろ。
-	var threeBackticks = "```"
-	
-	//	Reference: https://github.com/aiscript-dev/aiscript/blob/master/docs/std.md#datenow-num
-	//Tkg氏の助言を基にした https://misskey.io/notes/9lhwq42479
-	//今年を入れる
-	var currentYear = Date:year()
-	var currentMonth = Date:month()
-	var currentDay = Date:day()
-	
-	
-	
-	// @username@example.com の example.com部分。
-	//ここは紗々さんから教へてもらふた https://misskey.io/notes/9lhsh1umas
-	var SERVER_NAME = Mk:url().split('/')[2]
-	//地元鯖が初期値として入ってる仕組み
-	var noteUserHost = `{SERVER_NAME}`
-	var noteURI = ""
-	//notes.user.hostがnull以外だと{notes.user.host}を入れる
-	//このif文はしせるにゃんの助言 https://misskey.io/notes/9lgj0l6d02 を基にした
-	if (notes.user.host != null) {
-		noteUserHost = `{notes.user.host}`
-		noteURI = `{notes.uri}`
-	}
-
-	//ここから文件の處理
-	var noteFileNameArray = []
-	var noteFileURLArray = []
-	var noteFileMD5Array = []
-	
-	//もしnotes.filesが空の場合 ここは無視される氣がする
-	//もしnotes.filesが空っぽじゃなかったら
-	//notes.filesの要素回數分だけこの殊塊を周す
-	//1周每にnoteFile*Arrayの中へ[file].*の要素をpushする
-	//ここは特に紗々@salano_ym氏の助言を參考にした
-	// https://misskey.io/notes/9ljwy62lqa
-	each let file, notes.files {
-		noteFileNameArray.push(file.name)
-		noteFileURLArray.push(file.url)
-		noteFileMD5Array.push(file.md5)
-	}
-	
-	//
-	var noteFileNameArrayJoined = noteFileNameArray.join(", ")
-	var noteFileURLArrayJoined = noteFileURLArray.join(", ")
-	var noteFileMD5ArrayJoined = noteFileMD5Array.join(", ")
-	
-	//未實裝機能
-/*
-	fileurl = {leftCurlyBraces}{notes.files.url}{rightCurlyBraces},
-	filemd5 = {leftCurlyBraces}{notes.files.md5}{rightCurlyBraces},
-*/
-
-
-	// notes.text内に```があったら取り除く
-	// notes.text = null だったら壞れることが判明。知らなかったそんなの...
-	// もし notes.text が空っぽじゃなかったら、replaceをしてほしい
-	var noteTextNoCodeBlock = ""
-	if (notes.text != null) {
-		noteTextNoCodeBlock = notes.text.replace(threeBackticks, "")
-	}
-
-//蟲捕り用
-//Mk:dialog("" `@online{leftCurlyBraces}{notes.user.username}_{Date:year()},`) //This works
-
-	//この殊の核心となる部分がこちらです↓
-
-Mk:dialog("" `{threeBackticks}
-@online{leftCurlyBraces}{notes.user.username}_{noteCreatedAtUnix},
-	title = {leftCurlyBraces}{leftCurlyBraces}{notes.user.name}@{notes.user.username}{rightCurlyBraces}の投稿{rightCurlyBraces},
-	url = {leftCurlyBraces}{noteURL}{rightCurlyBraces},
-	abstract = {leftCurlyBraces}{leftCurlyBraces}{noteTextNoCodeBlock}{rightCurlyBraces}{rightCurlyBraces},
-	titleaddon = {leftCurlyBraces}{siteName}{rightCurlyBraces},
-	type = {leftCurlyBraces}microblogging{rightCurlyBraces},
-	author = {leftCurlyBraces}@{notes.user.username}@{noteUserHost}{rightCurlyBraces},
-	urldate = {leftCurlyBraces}{Date:year()}-{Date:month()}-{Date:day()}{rightCurlyBraces},
-	date = {leftCurlyBraces}{notes.createdAt}{rightCurlyBraces},
-	keywords = {leftCurlyBraces}{notes.tags}{rightCurlyBraces},
-	note =  {leftCurlyBraces}
-		filename = {leftCurlyBraces}{noteFileNameArrayJoined}{rightCurlyBraces},
-		fileurl = {leftCurlyBraces}{noteFileURLArrayJoined}{rightCurlyBraces},
-		filemd5 = {leftCurlyBraces}{noteFileMD5ArrayJoined}{rightCurlyBraces},
-		uri = {leftCurlyBraces}{noteURI}{rightCurlyBraces},
-		currenturldate = {leftCurlyBraces}{Date:now()}{rightCurlyBraces}
-	{rightCurlyBraces}
-{rightCurlyBraces}
-{threeBackticks}`)
+// @username@example.com の example.com部分。
+//ここは紗々さんから教へてもらふた https://misskey.io/notes/9lhsh1umas
+var SERVER_NAME = Mk:url().split('/')[2]
+//地元鯖が初期値として入ってる仕組み
+var noteUserHost = `{SERVER_NAME}`
+var noteURI = ""
+//notes.user.hostがnull以外だと{notes.user.host}を入れる
+//このif文はしせるにゃんの助言 https://misskey.io/notes/9lgj0l6d02 を基にした
+if (notes.user.host != null) {
+	noteUserHost = `{notes.user.host}`
+	noteURI = `{notes.uri}`
 }
 
-//ノートに項目を追加。押すと17行目の@functionCiteThisNoteが走る。
-Plugin:register_note_action(`このノートを引用する` functionCiteThisNote)
+//ここから文件の處理
+var noteFileNameArray = []
+var noteFileCommentArray = []
+var noteFileURLArray = []
+var noteFileMD5Array = []
+
+//もしnotes.filesが空の場合 ここは無視される氣がする
+//もしnotes.filesが空っぽじゃなかったら
+//notes.filesの要素回數分だけこの殊塊を周す
+//1周每にnoteFile*Arrayの中へ[file].*の要素をpushする
+//ここは特に紗々@salano_ym氏の助言を參考にした
+// https://misskey.io/notes/9ljwy62lqa
+each let file, notes.files {
+	noteFileNameArray.push(file.name)
+	noteFileCommentArray.push(file.comment)
+	noteFileURLArray.push(file.url)
+	noteFileMD5Array.push(file.md5)
+}
+var noteFileNameArrayJoined = noteFileNameArray.join(", ")
+var noteFileCommentArrayJoined = noteFileCommentArray.join("},{")
+var noteFileURLArrayJoined = noteFileURLArray.join(", ")
+var noteFileMD5ArrayJoined = noteFileMD5Array.join(", ")
+
+
+// ```の越化字列 threeBackTick Escape Sequence
+// notes.text内に```があったら取り除く
+// もし notes.text が null じゃなかったら、replaceをしてほしい
+var threeBackticks = "```"
+var noteTextNoCodeBlock = ""
+if (notes.text != null) {
+	noteTextNoCodeBlock = notes.text.replace(threeBackticks, "")
+}
+
+//////////////// 対録 Dialog
+	Mk:dialog("BibLaTeX Citation",
+			`
+\`\`\`
+@online\{{notes.user.username}_{noteCreatedAtUnix},
+	title = \{\{{notes.user.name}@{notes.user.username}\}の投稿\},
+	url = \{{noteURL}\},
+	abstract = \{\{{noteTextNoCodeBlock}\}\},
+	titleaddon = \{{siteName}\},
+	type = \{microblogging\},
+	author = \{@{notes.user.username}@{noteUserHost}\},
+	urldate = \{{Date:year()}-{Date:month()}-{Date:day()}\},
+	date = \{{notes.createdAt}\},
+	keywords = \{{notes.tags}\},
+	note =  \{
+		filename = \{{noteFileNameArrayJoined}\},
+		filecomment = \{\{{noteFileCommentArrayJoined}\}\},
+		fileurl = \{{noteFileURLArrayJoined}\},
+		filemd5 = \{{noteFileMD5ArrayJoined}\},
+		uri = \{{noteURI}\},
+		currenturldate = \{{Date:now()}\}
+	\}
+\}
+\`\`\`
+			`
+		)
+	}
+//////////////////////////////// 主關數ここまで
+
+
+// ノートに Plugin の品書きを接ぎ足す
+Plugin:register_note_action("このノートを引用する", CiteThisNoteAction)
